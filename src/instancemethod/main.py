@@ -31,11 +31,12 @@ class NotAnInstanceError(TypeError):
     """Raised when a method is called without an instantiation of the
     parent class.
     """
-    
+
     ERR_MSG = (
         "\nThe `{}` method can only be called by an instance of `{}` or one of "
         + "it's subclasses."
     )
+
     def __init__(self, method: Callable, method_owner: type[object]) -> None:
         super().__init__(
             self.ERR_MSG.format(method.__name__, method_owner.__name__)
@@ -47,35 +48,41 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
     that owns the method. NotAnInstanceError will raise if the caller 
     isn't an instance of the class or any of it's subclasses. 
     instancemethod must be declared the line piror to the method.
+    
+    Usage:
+    __________________________________________________________________
+    ### Declaration
 
-    *Valid* Example - NotAnInstanceError *ISN'T* Raised
-        >>> class Foo:
-        >>>     def __init__():
-        >>>         ...
+    >>> class Foo:
+    >>>     def __init__():
+    >>>         # Implementation
+    >>>         pass
+    >>>     
+    >>>     @instancemethod
+    >>>     def bar():
+    >>>         # Implementation
+    >>>         pass
 
-        >>>     @instancemethod
+    __________________________________________________________________
+    ### Valid Call Example
 
-        >>>     def bar():
-        >>>         ...
+        `foo = Foo()`
 
-        >>> foo = Foo()
-        >>> bar = foo.bar()
+        `bar = foo.bar()`
 
-    *Invalid* Example - NotAnInstanceError *IS* Raised
-        >>> class Foo:
-        >>>     def __init__():
-        >>>         ...
+        OR
 
-        >>>     @instancemethod
+        `bar = Foo().bar()`
 
-        >>>     def bar():
-        >>>         ...
+    __________________________________________________________________
+    ### Invalid Call Example
 
-        >>> bar = Foo.bar()
-        `NotAnInstanceError:`
-        `...`
+        `bar = Foo.bar()`
+
+    >>> `NotAnInstanceError:` '...'
+
+    __________________________________________________________________    
     """
-
     def instancemethod_wrapper(*args, **kwargs) -> Any:
         """Function wrapper that determines and verifies caller 
         hierarchy prior to method call.
@@ -106,3 +113,4 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
         # Invalid calls exit the try-except-else block and reach here
         raise NotAnInstanceError(func, method_owner_object)
     return instancemethod_wrapper
+
