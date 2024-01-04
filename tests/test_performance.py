@@ -1,5 +1,5 @@
 from timeit import timeit
-from unittest import TestCase, main
+from unittest import main, TestCase
 if __name__ != "__main__":
     from instancemethod import instancemethod, NotAnInstanceError
 else:
@@ -40,10 +40,10 @@ class Class:
             pass
 
         @instancemethod
-        def wrapped_nested_method(self) -> bool:
+        def wrapped_method(self) -> bool:
             return True
         
-        def unwrapped_nested_method(self) -> bool:
+        def unwrapped_method(self) -> bool:
             return True
     
 
@@ -75,31 +75,64 @@ TYPES = [
     AltClass(),
 ]
 
+BEST_BENCHMARK_WRAPPED_COMPARISON = 225
+BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
+
+
+def bulk_time(func: Callable, times: int = 1_000_000) -> float:
+    return timeit(func, number=times)
+
+
+def time_instance(instance: object) -> tuple[float]:
+    wrapped = bulk_time(instance.wrapped_method)
+    unwrapped = bulk_time(instance.unwrapped_method)
+    return (wrapped, unwrapped)
+
+
+def wrap_comparison(title: str, wrapped: float, unwrapped: float) -> float:
+    slower = 1/(unwrapped/wrapped)
+    print(f"\n\n{title}")
+    print("\tWrapped", "{:.2f}".format(wrapped), "microseconds/call")
+    print("\tUnwrapped", "{:.2f}".format(unwrapped), "microseconds/call")
+    print("\tWrapped is", "{:.0f}x".format(slower), "slower")
+    return slower
+
 
 class TestFunctionality(TestCase):
-    def test_class_differende(self):
-        time1 = timeit(Class().wrapped_method, number=10_000)
-        print("class_wrapped_time", "{:.16f}".format(time1 / 10_000), "seconds/call")
-        time2 = timeit(Class().unwrapped_method, number=10_000)
-        print("class_unwrapped_time", "{:.16f}".format(time2 / 10_000), "seconds/call")
-        print("Unrapped advantage:", "{:.2f}".format(1/(time2 / time1)))
-        self.assertLess(1 / (time2 / time1), 15_000)
+    wrapped_results = []
+    unwrapped_results = []
+    def test_a_time_classes(self):
+        wrapped, unwrapped = time_instance(Class())
+        self.wrapped_results.append(wrapped)
+        self.unwrapped_results.append(unwrapped)
+        slower = wrap_comparison("Instancing:", wrapped, unwrapped)
+        self.assertLess(slower, BENCHMARK_ASSERTION_THRESHHOLD)
 
-    def test_sub_class_wrapped_time(self):
-        time1 = timeit(SubClass().wrapped_method, number=10_000)
-        print("sub_class_wrapped_time", "{:.16f}".format(time1 / 10_000, "seconds/call"))
-        time2 = timeit(SubClass().unwrapped_method, number=10_000)
-        print("sub_class_unwrapped_time", "{:.16f}".format(time2 / 10_000, "seconds/call"))
-        print("Unrapped advantage:", "{:.2f}".format(1/(time2 / time1)))
-        self.assertLess(1 / (time2 / time1), 15_000)
+    def test_b_time_sub_classes(self):
+        wrapped, unwrapped = time_instance(SubClass())
+        self.wrapped_results.append(wrapped)
+        self.unwrapped_results.append(unwrapped)
+        slower = wrap_comparison("Inherited Instancing:", wrapped, unwrapped)
+        self.assertLess(slower, BENCHMARK_ASSERTION_THRESHHOLD)
 
-    def test_nested_class_wrapped_time(self):
-        time1 = timeit(Class().NestedClass().wrapped_nested_method, number=10_000)
-        print("nested_class_wrapped_time", "{:.16f}".format(time1 / 10_000, "seconds/call"))
-        time2 = timeit(Class().NestedClass().unwrapped_nested_method, number=10_000)
-        print("nested_class_unwrapped_time", "{:.16f}".format(time2 / 10_000, "seconds/call"))
-        print("Unrapped advantage:", "{:.2f}".format(1/(time2 / time1)))
-        self.assertLess(1 / (time2 / time1), 15_000)
+    def test_c_time_nested_classes(self):
+        wrapped, unwrapped = time_instance(Class.NestedClass())
+        self.wrapped_results.append(wrapped)
+        self.unwrapped_results.append(unwrapped)
+        slower = wrap_comparison("Nested Class Instancing:", wrapped, unwrapped)
+        self.assertLess(slower, BENCHMARK_ASSERTION_THRESHHOLD)
+    
+    def test_z_time_benchmark_results(self):
+        slower = wrap_comparison("Overall:", self.wrapped, self.unwrapped)
+        self.assertLess(slower, BENCHMARK_ASSERTION_THRESHHOLD)
+
+    @property
+    def wrapped(self) -> float:
+        return sum(self.wrapped_results) / len(self.wrapped_results)
+    
+    @property
+    def unwrapped(self) -> float:
+        return sum(self.unwrapped_results) / len(self.unwrapped_results)
         
 
 if __name__ == "__main__":

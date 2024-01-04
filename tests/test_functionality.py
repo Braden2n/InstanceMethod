@@ -28,7 +28,10 @@ class Class:
         pass
 
     @instancemethod
-    def method(self) -> bool:
+    def wrapped_method(self) -> bool:
+        return True
+    
+    def unwrapped_method(self) -> bool:
         return True
     
     class NestedClass:
@@ -36,7 +39,10 @@ class Class:
             pass
 
         @instancemethod
-        def nested_method(self) -> bool:
+        def wrapped_method(self) -> bool:
+            return True
+        
+        def unwrapped_method(self) -> bool:
             return True
     
 
@@ -71,38 +77,38 @@ TYPES = [
 
 class TestFunctionality(TestCase):
     def test_class_works(self):
-        self.assertTrue(Class().method())
+        self.assertTrue(Class().wrapped_method())
 
     def test_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
-            Class.method()
+            Class.wrapped_method()
         for test_type in TYPES:
             with self.assertRaises(NotAnInstanceError):
-                Class.method(test_type)
+                Class.wrapped_method(test_type)
 
     def test_sub_class_works(self):
-        self.assertTrue(SubClass().method())
+        self.assertTrue(SubClass().wrapped_method())
 
     def test_sub_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
-            SubClass.method()
+            SubClass.wrapped_method()
         for test_type in TYPES:
             with self.assertRaises(NotAnInstanceError):
-                SubClass.method(test_type)
+                SubClass.wrapped_method(test_type)
 
     def test_nested_class_works(self):
-        self.assertTrue(Class().NestedClass().nested_method())
+        self.assertTrue(Class().NestedClass().wrapped_method())
 
     def test_nested_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
-            Class.NestedClass.nested_method()
+            Class.NestedClass.wrapped_method()
         with self.assertRaises(NotAnInstanceError):
-            Class().NestedClass.nested_method()
+            Class().NestedClass.wrapped_method()
         for test_type in TYPES:
             with self.assertRaises(NotAnInstanceError):
-                Class.NestedClass.nested_method(test_type)
+                Class.NestedClass.wrapped_method(test_type)
             with self.assertRaises(NotAnInstanceError):
-                Class().NestedClass.nested_method(test_type)
+                Class().NestedClass.wrapped_method(test_type)
         
 
 if __name__ == "__main__":
