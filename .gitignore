@@ -1,3 +1,4 @@
 /dist
 /pyproject.toml
 /tests
+/.vscode
