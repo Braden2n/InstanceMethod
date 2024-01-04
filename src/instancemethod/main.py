@@ -6,13 +6,26 @@ that contains the method.
 This module also contains the `NotAnInstanceError` error class that is
 thrown during invalid calls of a wrapped method.
 """
+__version__ = "1.2.2"
 __all__ = [
     "instancemethod",
     "NotAnInstanceError",
 ]
+__refs__ = {
+    "AUTHOR": {
+        "Name": "Braden Toone",
+        "Email": "braden@toonetown.com"
+    },
+    "HOMEPAGE": "https://github.com/Braden2n/InstanceMethod",
+    "DOCUMENTATION": "https://github.com/Braden2n/InstanceMethod",
+    "ISSUES": "https://github.com/Braden2n/InstanceMethod/issues",
+    "REPOSITORY": "https://github.com",
+    "CHANGELOG": "https://github.com/Braden2n/InstanceMethod/activity",
+}
 from inspect import getmembers
 from sys import modules
 from typing import Any, Callable
+
 
 
 NOT_AN_INSTANCE_ERR_MSG = (
