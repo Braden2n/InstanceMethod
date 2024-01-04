@@ -21,8 +21,10 @@ function to wrap a method and designate it as an instance method.
 ### Declaration
 
 `class Foo:`
+``
     `def __init__():`
         `...`
+``
     `@instancemethod`
     `def bar():`
         `...`
