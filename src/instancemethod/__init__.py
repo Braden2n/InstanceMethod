@@ -7,7 +7,6 @@ This module also contains the `NotAnInstanceError` error class that is
 thrown during invalid calls of a wrapped method.
 """
 from inspect import getmembers, getmodule
-from sys import modules
 from typing import Any, Callable
 __version__ = "1.2.2"
 __all__ = [
@@ -109,11 +108,11 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
         """Function wrapper that determines and verifies caller 
         hierarchy prior to method call.
 
-        1. Gets method owner from caller scope using method qualname
-        2. Verifies the first arg is an instance of the owner class
+        1. Gets method owners from caller scope using method qualname
+        2. Verifies first arg is an instance of the owner class(es)
         3. Returns the function call
 
-        Raises NotAnInstanceError if not al conditions are met.
+        Raises NotAnInstanceError if not all conditions are met.
         """
         # Getting the owner (index 1) of the first item returned
         head_owner = head_caller(getmembers(getmodule(func), owns_method))
