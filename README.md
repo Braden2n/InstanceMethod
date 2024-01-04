@@ -4,6 +4,7 @@ Sections:
 
 - [Purpose](#purpose)
 - [Contents](#contents)
+- [Installation](#installation)
 - [Usage](#usage)
     - [Declaration](#declaration)
     - [Valid Usage](#valid-usage)
@@ -27,6 +28,14 @@ with the following code blocks:
 
 - `instancemethod`: Higher order function for wrapping methods
 - `NotAnInstanceError`: Error raised when validation fails
+
+## Installation
+
+This package is distributed to PyPi, and can be installed with either
+of the following commands:
+
+- `pip install instancemethod`
+- `pip3 install instancemethod`
 
 ## Usage
 
