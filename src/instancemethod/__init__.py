@@ -8,7 +8,7 @@ thrown during invalid calls of a wrapped method.
 """
 from inspect import getmembers, getmodule
 from typing import Any, Callable
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __all__ = [
     "instancemethod",
     "NotAnInstanceError",
