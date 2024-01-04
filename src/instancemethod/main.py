@@ -6,6 +6,9 @@ that contains the method.
 This module also contains the `NotAnInstanceError` error class that is
 thrown during invalid calls of a wrapped method.
 """
+from inspect import getmembers
+from sys import modules
+from typing import Any, Callable
 __version__ = "1.2.2"
 __all__ = [
     "instancemethod",
@@ -22,28 +25,20 @@ __refs__ = {
     "REPOSITORY": "https://github.com",
     "CHANGELOG": "https://github.com/Braden2n/InstanceMethod/activity",
 }
-from inspect import getmembers
-from sys import modules
-from typing import Any, Callable
-
-
-
-NOT_AN_INSTANCE_ERR_MSG = (
-    "\nThe `{}` method can only be called by an instance of `{}` or one of it's"
-    + " subclasses."
-)
 
 
 class NotAnInstanceError(TypeError):
     """Raised when a method is called without an instantiation of the
     parent class.
     """
-
+    
+    ERR_MSG = (
+        "\nThe `{}` method can only be called by an instance of `{}` or one of "
+        + "it's subclasses."
+    )
     def __init__(self, method: Callable, method_owner: type[object]) -> None:
         super().__init__(
-            NOT_AN_INSTANCE_ERR_MSG.format(
-                method.__name__, method_owner.__name__
-            )
+            self.ERR_MSG.format(method.__name__, method_owner.__name__)
         )
 
 
