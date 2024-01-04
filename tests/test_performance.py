@@ -29,7 +29,7 @@ def wrap_comparison(title: str, wrapped: float, unwrapped: float) -> float:
     return slower
 
 
-class TestFunctionality(TestCase):
+class TestPerformance(TestCase):
     wrapped_results = []
     unwrapped_results = []
     def test_a_time_classes(self):
