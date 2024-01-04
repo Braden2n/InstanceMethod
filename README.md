@@ -20,20 +20,21 @@ function to wrap a method and designate it as an instance method.
 
 ### Declaration
 
->class Foo:
+>   "class Foo:
 > 
->    def __init__():
->        ...
+>       def __init__():
+>
+>           ...
 >     
->    @instancemethod
->    def bar():
->        ...
+>       @instancemethod
+>       def bar():
+>           ..."
 
 ### Valid Usage
 
->foo = Foo()
+>   foo = Foo()
 > 
->bar = foo.bar()
+>   bar = foo.bar()
 
 ### Invalid Usage
 
