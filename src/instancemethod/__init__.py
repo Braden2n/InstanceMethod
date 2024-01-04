@@ -6,7 +6,7 @@ that contains the method.
 This module also contains the `NotAnInstanceError` error class that is
 thrown during invalid calls of a wrapped method.
 """
-from inspect import getmembers
+from inspect import getmembers, getmodule
 from sys import modules
 from typing import Any, Callable
 __version__ = "1.2.2"
@@ -83,6 +83,20 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
 
     __________________________________________________________________    
     """
+    def predicate(func: Callable[..., Any]) -> Callable[[object], bool]:
+        """Function generator that returns a predicate function for
+        use with inspect.getmodule.
+        """
+        def owns_class(object: object) -> bool:
+            """Predicate function to determine if an object is a class
+            whose name is equal to the owner of a given method.
+            """
+            return (
+                type(object)==type and
+                object.__name__==func.__qualname__[0:-1*(len(func.__name__) + 1)]
+            )
+        return owns_class
+    
     def instancemethod_wrapper(*args, **kwargs) -> Any:
         """Function wrapper that determines and verifies caller 
         hierarchy prior to method call.
@@ -90,27 +104,17 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
         1. Gets method owner from caller scope using method qualname
         2. Verifies the first arg is an instance of the owner class
         3. Returns the function call
+
+        Raises NotAnInstanceError if not al conditions are met.
         """
-        # Base case is  _InaccessibleClass if owner not found in loop
-        class _InaccessibleClass:
-            pass
-        method_owner_object = _InaccessibleClass
-        # Get owner by func qualname match from caller module objects
-        for name, obj in getmembers(modules["__main__"]):
-            if name == func.__qualname__[0 : -1 * (len(func.__name__) + 1)]:
-                method_owner_object = obj
-                break
-        # Verify first arg is self
+        # Getting the value (index 1) of the first item returned
+        method_owner = getmembers(getmodule(func), predicate(func))[0][1]
         try:
             self = args[0]
         except IndexError:
             pass
         else:
-            if isinstance(self, method_owner_object):
-                # Return function call
+            if isinstance(self, method_owner):
                 return func(*args, **kwargs)
-            print(self)
-        # Invalid calls exit the try-except-else block and reach here
-        raise NotAnInstanceError(func, method_owner_object)
+        raise NotAnInstanceError(func, method_owner)
     return instancemethod_wrapper
-
