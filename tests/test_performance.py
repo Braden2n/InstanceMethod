@@ -1,82 +1,61 @@
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
+from shutil import rmtree
 from timeit import timeit
+from typing import Callable
 from unittest import main, TestCase
-if __name__ != "__main__":
-    from instancemethod import instancemethod, NotAnInstanceError
-else:
-    # F-ing ugly import hacking because python sucks >:(
-    from importlib.util import spec_from_file_location, module_from_spec
-    from pathlib import Path
-    from shutil import rmtree
-    from typing import Any, Callable
-    module_path = Path(__file__).resolve().parents[1] / "src/instancemethod"
-    # importlib loading jiggery pokery voodoo magic
-    spec = spec_from_file_location(
-        "instancemethod", 
-        (module_path / "__init__.py").absolute()
-    )
-    module = module_from_spec(spec)
-    spec.loader.exec_module(module)
-    # naming used vars
-    instancemethod: Callable[[Callable[..., Any]], Callable[..., Any]] = module\
-        .instancemethod
-    NotAnInstanceError: TypeError = module.NotAnInstanceError
-    # rm-ing unwanted runtime dir caused by exec_module
-    rmtree((module_path / "__pycache__"))
+# F-ing ugly import hacking because python sucks >:(
+# Required for testing on a machine that also has the package instaled
+module_path = Path(__file__).resolve().parents[1] / "src/instancemethod"
+# importlib module loading jiggery pokery voodoo magic
+spec = spec_from_file_location(
+    "instancemethod", 
+    (module_path / "__init__.py").absolute()
+)
+module = module_from_spec(spec)
+spec.loader.exec_module(module)
+# Getting instance method from loaded package
+instancemethod = module.instancemethod
+# rm -rfing unwanted runtime dir caused by exec_module
+rmtree((module_path / "__pycache__"))
+
+
+BEST_BENCHMARK_WRAPPED_COMPARISON = 225
+BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
 
 
 class Class:
+    """Base Class for testing instantiation"""
     def __init__(self) -> None:
         pass
 
     @instancemethod
     def wrapped_method(self) -> bool:
+        """Wrapped method that returns true."""
         return True
     
     def unwrapped_method(self) -> bool:
+        """Unwrapped method that returns true."""
         return True
     
     class NestedClass:
+        """Nested Class for testing attribute nesting"""
         def __init__(self) -> None:
             pass
 
         @instancemethod
         def wrapped_method(self) -> bool:
+            """Wrapped method that returns true."""
             return True
         
         def unwrapped_method(self) -> bool:
+            """Unwrapped method that returns true."""
             return True
     
 
 class SubClass(Class):
+    """Inheriting Class for testing inheritance."""
     pass
-
-
-class AltClass:
-    def __init__(self) -> None:
-        pass
-
-
-TYPES = [
-    None,
-    int(),
-    float(),
-    complex(),
-    str(),
-    list(),
-    tuple(),
-    range(0),
-    bytes(),
-    bytearray(),
-    memoryview(bytes(0)),
-    dict(),
-    bool(),
-    set(),
-    frozenset(),
-    AltClass(),
-]
-
-BEST_BENCHMARK_WRAPPED_COMPARISON = 225
-BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
 
 
 def bulk_time(func: Callable, times: int = 1_000_000) -> float:
