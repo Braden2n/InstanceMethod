@@ -4,7 +4,8 @@ from unittest import main, TestCase
 from classes import Class, SubClass
 
 
-BEST_BENCHMARK_WRAPPED_COMPARISON = 225
+# Current Microseconds/call: 4
+BEST_BENCHMARK_WRAPPED_COMPARISON = 50
 BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
 
 
