@@ -78,6 +78,7 @@ TYPES = [
 class TestFunctionality(TestCase):
     def test_class_works(self):
         self.assertTrue(Class().wrapped_method())
+        self.assertTrue(Class.wrapped_method(Class()))
 
     def test_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
@@ -88,6 +89,7 @@ class TestFunctionality(TestCase):
 
     def test_sub_class_works(self):
         self.assertTrue(SubClass().wrapped_method())
+        self.assertTrue(SubClass.wrapped_method(SubClass()))
 
     def test_sub_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
@@ -97,7 +99,8 @@ class TestFunctionality(TestCase):
                 SubClass.wrapped_method(test_type)
 
     def test_nested_class_works(self):
-        self.assertTrue(Class().NestedClass().wrapped_method())
+        self.assertTrue(Class.NestedClass().wrapped_method())
+        self.assertTrue(Class.NestedClass.wrapped_method(Class.NestedClass()))
 
     def test_nested_class_fails(self):
         with self.assertRaises(NotAnInstanceError):
