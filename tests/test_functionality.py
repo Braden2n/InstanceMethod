@@ -17,6 +17,11 @@ class SubClass(Class):
     pass
 
 
+class AltClass:
+    def __init__(self) -> None:
+        pass
+
+
 TEST_TYPES = [
     int(),
     float(),
@@ -31,7 +36,8 @@ TEST_TYPES = [
     dict(),
     bool(),
     set(),
-    frozenset()
+    frozenset(),
+    AltClass(),
 ]
 
 class TestInstanceMethods(unittest.TestCase):
