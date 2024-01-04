@@ -1,6 +1,7 @@
 __all__ = [
     "decorator",
 ]
+__version__ = "1.2.0"
 AUTHOR = {
     "Name": "Braden Toone",
     "Email": "braden@toonetown.com"
