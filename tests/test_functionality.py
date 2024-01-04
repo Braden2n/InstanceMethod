@@ -1,8 +1,26 @@
 import unittest
-if __name__ == "__main__":
-    from sys import path
-    path.insert(0, "../src/instancemethod.py")
-from instancemethod import instancemethod, NotAnInstanceError
+if __name__ != "__main__":
+    from instancemethod import instancemethod, NotAnInstanceError
+else:
+    # F-ing ugly import hacking because python sucks >:(
+    from importlib.util import spec_from_file_location, module_from_spec
+    from pathlib import Path
+    from shutil import rmtree
+    from typing import Any, Callable
+    module_path = Path(__file__).resolve().parents[1] / "src/instancemethod"
+    # importlib loading jiggery pokery voodoo magic
+    spec = spec_from_file_location(
+        "instancemethod", 
+        (module_path / "__init__.py").absolute()
+    )
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    # naming used vars
+    instancemethod: Callable[[Callable[..., Any]], Callable[..., Any]] = module\
+        .instancemethod
+    NotAnInstanceError: TypeError = module.NotAnInstanceError
+    # rm-ing unwanted runtime dir caused by exec_module
+    rmtree((module_path / "__pycache__"))
 
 
 class Class:
