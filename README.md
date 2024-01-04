@@ -23,25 +23,24 @@ function to wrap a method and designate it as an instance method.
     class Foo:
         def __init__():
             ...
+    
         @instancemethod
         def bar():
             ...
 
 ### Valid Usage
 
-foo = Foo()
-
-bar = foo.bar()
+    foo = Foo()
+    bar = foo.bar()
 
 ### Invalid Usage
 
-bar = Foo.bar()
+    bar = Foo.bar()
 
 Returns
 
-NotAnInstanceError:
-
-...
+    NotAnInstanceError:
+    ...
 
 ## Author
 
