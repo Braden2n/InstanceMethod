@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 if __name__ != "__main__":
     from instancemethod import instancemethod, NotAnInstanceError
 else:
@@ -69,7 +69,7 @@ TYPES = [
 ]
 
 
-class TestFunctionality(unittest.TestCase):
+class TestFunctionality(TestCase):
     def test_class_works(self):
         self.assertTrue(Class().method())
 
@@ -106,4 +106,4 @@ class TestFunctionality(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
