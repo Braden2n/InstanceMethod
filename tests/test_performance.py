@@ -92,8 +92,8 @@ def time_instance(instance: object) -> tuple[float]:
 def wrap_comparison(title: str, wrapped: float, unwrapped: float) -> float:
     slower = 1/(unwrapped/wrapped)
     print(f"\n\n{title}")
-    print("\tWrapped", "{:.2f}".format(wrapped), "microseconds/call")
-    print("\tUnwrapped", "{:.2f}".format(unwrapped), "microseconds/call")
+    print("\tWrapped", "{:.3f}".format(wrapped), "microseconds/call")
+    print("\tUnwrapped", "{:.3f}".format(unwrapped), "microseconds/call")
     print("\tWrapped is", "{:.0f}x".format(slower), "slower")
     return slower
 
