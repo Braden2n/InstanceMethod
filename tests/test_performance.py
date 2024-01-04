@@ -4,8 +4,9 @@ from unittest import main, TestCase
 from classes import Class, SubClass
 
 
-# Current Microseconds/call: 4
-BEST_BENCHMARK_WRAPPED_COMPARISON = 50
+# Decorated Microseconds/call: 3.85
+# Null-Decorated Microseconds/Call: 0.08
+BEST_BENCHMARK_WRAPPED_COMPARISON = 46
 BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
 
 
@@ -22,9 +23,9 @@ def time_instance(instance: object) -> tuple[float]:
 def wrap_comparison(title: str, wrapped: float, unwrapped: float) -> float:
     slower = 1/(unwrapped/wrapped)
     print(f"\n\n{title}")
-    print("\tWrapped", "{:.3f}".format(wrapped), "microseconds/call")
-    print("\tUnwrapped", "{:.3f}".format(unwrapped), "microseconds/call")
-    print("\tWrapped is", "{:.0f}x".format(slower), "slower")
+    print("\tWrapped", "{:.4f}".format(wrapped), "microseconds/call")
+    print("\tUnwrapped", "{:.4f}".format(unwrapped), "microseconds/call")
+    print("\tWrapped is", "{:.2f}x".format(slower), "slower")
     return slower
 
 
