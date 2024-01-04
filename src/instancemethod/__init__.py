@@ -82,27 +82,13 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
 
     __________________________________________________________________    
     """
-    head_caller_name = func.__qualname__.split('.')[0]
-    direct_owner = None
-    def owns_method(obj: object) -> bool:
-        """Recursive function that determines if an object or any of 
-        it's public attributes have ownership over the method.
+    tree = func.__qualname__.split('.')
+    def owns_method(object: object) -> bool:
+        """Determines if an object owns the method using the name of
+        the first item in the qualified name tree.
         """
-        if hasattr(obj, func.__name__):
-            nonlocal direct_owner
-            direct_owner = obj
-            return True
-        public_attributes = [name for name in dir(obj) if name[0] != '_']
-        for name in public_attributes:
-            attribute = getattr(obj, name)
-            if type(attribute)==type or type(attribute)==object:
-                return owns_method(attribute)
-        return False
-    
-    def head_caller(owners: list[tuple[str, object]]) -> object:
-        for owner in owners:
-            if owner[0]==head_caller_name:
-                return owner[1]
+        nonlocal tree
+        return type(object)==type and object.__name__==tree[0]
 
     def instancemethod_wrapper(*args, **kwargs) -> Any:
         """Function wrapper that determines and verifies caller 
@@ -114,14 +100,17 @@ def instancemethod(func: Callable[..., Any]) -> Callable[..., Any]:
 
         Raises NotAnInstanceError if not all conditions are met.
         """
-        # Getting the owner (index 1) of the first item returned
-        head_owner = head_caller(getmembers(getmodule(func), owns_method))
+        # Getting the head owner (index 1) of the first item returned
+        owner = getmembers(getmodule(func), owns_method)[0][1]
+        # Traversing down attributes to get direct owner
+        for attribute in tree[1:-1]:
+            owner = getattr(owner, attribute)
         try:
             self = args[0]
         except IndexError:
             pass
         else:
-            if isinstance(self, head_owner) or isinstance(self, direct_owner):
+            if isinstance(self, owner):
                 return func(*args, **kwargs)
-        raise NotAnInstanceError(func, head_owner)
+        raise NotAnInstanceError(func, owner)
     return instancemethod_wrapper
