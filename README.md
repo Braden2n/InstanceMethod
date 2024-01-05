@@ -68,14 +68,16 @@ Returns
 
 ## Issues/Limitations
 
-There are currently no known stabilitiy issues, so this package has 
-been marked as:
+There are currently no known stability or performance issues, so this 
+package has been marked as:
 
 ***Production***
 
-There are some known performance bottlenecks, with specifics covered
-in the [Bottlenecks](#bottlenecks) portion of the 
-[Performance](#performance) section
+Previous [bottlenecks](#bottlenecks), a 
+[deep-dive](#bottleneck-deep-dive) into their causes, and the 
+explanation of their [solution](#bottleneck-solution) are located in 
+the [Bottlenecks](#bottlenecks) portion of the 
+[Performance](#performance) section.
 
 ## Testing
 
@@ -104,41 +106,67 @@ function calls are made for each.
 ### Current Stats
 
 The `instancemethod` decorator is currently:
-46
+1.64
 times slower than `null_decorator` over the course of 1 Million calls.
 
-Average Microseconds per Call:
+Average Nanoseconds per Call:
 
-- `instancemethod`: 3.85
-- `null_decorator`: 0.08
+- `instancemethod`: 139.2
+- `null_decorator`: 85.0
 
 ***No*** appreciable difference has been found between the valid test
 cases.
 
 ### Bottlenecks
 
-There are two main bottlenecks that have been found:
+Previous versions contained three main bottlenecks that hindered 
+performance significantly (50x slower than `null_decorator`):
 
-- The usage of the `inspect` module
+- The usage of the `inspect`.`getmodule` function
+- The usage of the `inspect`.`getmembers` function
 - The ownership attribute loop
 
-The `inspect` module is used to get module and members that declared 
-the function. This module is needed, as the package does not have 
-adequate scope to use the `__class__` reference. Although the 
-`getmodule` method can, and has, been hoisted to the highest order
-function to place move the computation to the time of declaration as
-opposed to call time, the `getmembers` method remains one order lower.
+### Bottleneck Deep-Dive
 
-The `getmembers` method runs based on the state of a given module,
-with a predicate implemented for faster elimination of invalid
-potential method owners. If this method is called at declaration time,
-it will frequently return no valid members. There is not a solution
-obvious at this time.
+The `inspect` module and its `getmodule` and `getmembers` functions
+are necessary for determining the class that has direct ownership of
+the wrapped method. In previous versions, both the `getmodule` and 
+`getmembers` functions were used in the wrapper function declared 
+inside the higher order decorator.
 
-Although the loop is not too computationally intensive, this is a
-potential bottleneck for deeply nested or inherited class structures.
-Some research has been done into object dictionary conversions with 
-string indexing, but it has not yielded any appreciable benefit.
+Although marginal (5%) performance benefits were found by hoisting the 
+`getmodule` up to the scope of the decorator function, by shifting the 
+computation burden to declaration time as opposed to call time, the 
+`getmembers` function was unable to be hoisted due to the changing 
+state of a module at load time versus call time. Some performance was
+reclaimed by the use of a lambda filtering predicate, but much was 
+left to be desired.
+
+Along with the `inspect` module functions, the "ownership attribute"
+loop was another potential bottleneck. Since the only obvious way to
+ascertain the class was through the method's fully qualified name,
+accessing nested classes to reach down towards the method's direct
+owner needed to be done using string attribute searches. Although the
+loop is not too computationally intensive, this could be a bottleneck
+for deeply nested or inherited class structures.
+
+### Bottleneck Solution
+
+The current solution in place was to extract the declaration and 
+computation of these bottlenecks to a separate function in the 
+package's local scope, as opposed to the decorator's scope, and 
+enabling LRU caching from the `functools` module. 
+
+For those unfamiliar, the lru_cache function, when used as a 
+decorator, creates a memory-optimized call-result caching solution
+that exchanges the full computation requirements of a function call
+for a dictionary lookup of the result.
+
+Since the penalty for a first-time call is 
+~4 Microseconds, the caching of the results on a per-method basis 
+provides a performance increase of 3,000%. This is because the 
+dictionary lookup has a time complexity of, on average, O(1) that
+results in ~125 Nanosecond follow-up calls.
 
 ## Author
 

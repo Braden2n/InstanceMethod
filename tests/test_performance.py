@@ -4,9 +4,9 @@ from unittest import main, TestCase
 from classes import Class, SubClass
 
 
-# Decorated Microseconds/call: 3.85
-# Null-Decorated Microseconds/Call: 0.08
-BEST_BENCHMARK_WRAPPED_COMPARISON = 46
+# Decorated Nanoseconds/call: 139.20
+# Null-Decorated Nanoseconds/Call: 85.01
+BEST_BENCHMARK_WRAPPED_COMPARISON = 1.63
 BENCHMARK_ASSERTION_THRESHHOLD = BEST_BENCHMARK_WRAPPED_COMPARISON * 1.5
 
 
@@ -15,16 +15,16 @@ def bulk_time(func: Callable, times: int = 1_000_000) -> float:
 
 
 def time_instance(instance: object) -> tuple[float]:
-    wrapped = bulk_time(instance.wrapped_method)
-    unwrapped = bulk_time(instance.unwrapped_method)
+    wrapped = bulk_time(instance.wrapped_method) * 1000
+    unwrapped = bulk_time(instance.unwrapped_method) * 1000
     return (wrapped, unwrapped)
 
 
 def wrap_comparison(title: str, wrapped: float, unwrapped: float) -> float:
     slower = 1/(unwrapped/wrapped)
     print(f"\n\n{title}")
-    print("\tWrapped", "{:.4f}".format(wrapped), "microseconds/call")
-    print("\tUnwrapped", "{:.4f}".format(unwrapped), "microseconds/call")
+    print("\tWrapped", "{:.3f}".format(wrapped), "Nanoseconds/call")
+    print("\tUnwrapped", "{:.3f}".format(unwrapped), "Nanoseconds/call")
     print("\tWrapped is", "{:.2f}x".format(slower), "slower")
     return slower
 
