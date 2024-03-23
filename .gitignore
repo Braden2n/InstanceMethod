@@ -2,3 +2,5 @@
 /pyproject.toml
 /.vscode
 */__pycache__
+/instancemethod.egg-info
+/build
