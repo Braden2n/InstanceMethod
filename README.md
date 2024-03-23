@@ -19,7 +19,7 @@ Sections:
 
 This package containing code and its example usage for restricting
 method calls to instances of the class or subclass that contains the
-method. Support has been added for nesting classes as attributes. 
+method. Support has been added for nesting classes as attributes.
 
 ## Contents
 
@@ -68,15 +68,15 @@ Returns
 
 ## Issues/Limitations
 
-There are currently no known stability or performance issues, so this 
+There are currently no known stability or performance issues, so this
 package has been marked as:
 
 ***Production***
 
-Previous [bottlenecks](#bottlenecks), a 
-[deep-dive](#bottleneck-deep-dive) into their causes, and the 
-explanation of their [solution](#bottleneck-solution) are located in 
-the [Bottlenecks](#bottlenecks) portion of the 
+Previous [bottlenecks](#bottlenecks), a
+[deep-dive](#bottleneck-deep-dive) into their causes, and the
+explanation of their [solution](#bottleneck-solution) are located in
+the [Bottlenecks](#bottlenecks) portion of the
 [Performance](#performance) section.
 
 ## Testing
@@ -91,35 +91,35 @@ The following test cases are currently implemented:
     - Calling method from an instance of a class in a nested hierarchy
         - Foo.Bar().foo()
 - Decorator blocks all other cases:
-    - Calling method without an instance of any above mentioned cases
+    - Calling method without an instance of any above-mentioned cases
         - Fuzzing implemented using instances of all built-in types
-        and non-inheriting classes
+          and non-inheriting classes
 
 ## Performance
 
 Performance testing is implemented for all valid test cases against a
-control method. The control method is 
-decorated with a `null_decorator` decorator that adds no functionality. 
-This is compared to the `instancemethod` decorator; 1 Million 
+control method. The control method is
+decorated with a `null_decorator` decorator that adds no functionality.
+This is compared to the `instancemethod` decorator; 1 Million
 function calls are made for each.
 
 ### Current Stats
 
 The `instancemethod` decorator is currently:
-1.64
+1.65
 times slower than `null_decorator` over the course of 1 Million calls.
 
 Average Nanoseconds per Call:
 
-- `instancemethod`: 139.2
-- `null_decorator`: 85.0
+- `instancemethod`: 140
+- `null_decorator`: 85
 
 ***No*** appreciable difference has been found between the valid test
 cases.
 
 ### Bottlenecks
 
-Previous versions contained three main bottlenecks that hindered 
+Previous versions contained three main bottlenecks that hindered
 performance significantly (50x slower than `null_decorator`):
 
 - The usage of the `inspect`.`getmodule` function
@@ -130,16 +130,16 @@ performance significantly (50x slower than `null_decorator`):
 
 The `inspect` module and its `getmodule` and `getmembers` functions
 are necessary for determining the class that has direct ownership of
-the wrapped method. In previous versions, both the `getmodule` and 
-`getmembers` functions were used in the wrapper function declared 
+the wrapped method. In previous versions, both the `getmodule` and
+`getmembers` functions were used in the wrapper function declared
 inside the higher order decorator.
 
-Although marginal (5%) performance benefits were found by hoisting the 
-`getmodule` up to the scope of the decorator function, by shifting the 
-computation burden to declaration time as opposed to call time, the 
-`getmembers` function was unable to be hoisted due to the changing 
+Although marginal (5%) performance benefits were found by hoisting the
+`getmodule` up to the scope of the decorator function, by shifting the
+computation burden to declaration time as opposed to call time, the
+`getmembers` function was unable to be hoisted due to the changing
 state of a module at load time versus call time. Some performance was
-reclaimed by the use of a lambda filtering predicate, but much was 
+reclaimed by the use of a lambda filtering predicate, but much was
 left to be desired.
 
 Along with the `inspect` module functions, the "ownership attribute"
@@ -152,19 +152,19 @@ for deeply nested or inherited class structures.
 
 ### Bottleneck Solution
 
-The current solution in place was to extract the declaration and 
-computation of these bottlenecks to a separate function in the 
-package's local scope, as opposed to the decorator's scope, and 
-enabling LRU caching from the `functools` module. 
+The current solution in place was to extract the declaration and
+computation of these bottlenecks to a separate function in the
+package's local scope, as opposed to the decorator's scope, and
+enabling LRU caching from the `functools` module.
 
-For those unfamiliar, the lru_cache function, when used as a 
+For those unfamiliar, the lru_cache function, when used as a
 decorator, creates a memory-optimized call-result caching solution
 that exchanges the full computation requirements of a function call
 for a dictionary lookup of the result.
 
-Since the penalty for a first-time call is 
-~4 Microseconds, the caching of the results on a per-method basis 
-provides a performance increase of 3,000%. This is because the 
+Since the penalty for a first-time call is
+~4 Microseconds, the caching of the results on a per-method basis
+provides a performance increase of 3,000%. This is because the
 dictionary lookup has a time complexity of, on average, O(1) that
 results in ~125 Nanosecond follow-up calls.
 
