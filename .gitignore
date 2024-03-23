@@ -4,4 +4,5 @@
 */__pycache__
 /instancemethod.egg-info
 /build
-*/.idea/*
+.idea
+instancemethod.egg-info
