@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+instancemethod.egg-info/PKG-INFO
+instancemethod.egg-info/SOURCES.txt
+instancemethod.egg-info/dependency_links.txt
+instancemethod.egg-info/top_level.txt
+tests/test_functionality.py
+tests/test_performance.py
