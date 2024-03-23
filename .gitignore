@@ -4,3 +4,4 @@
 */__pycache__
 /instancemethod.egg-info
 /build
+*/.idea/*
