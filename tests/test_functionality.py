@@ -1,8 +1,13 @@
-from unittest import main, TestCase
-from classes import AltClass, Class, NotAnInstanceError, SubClass
+from unittest import TestCase, main
+
+from src.instancemethod import NotAnInstanceError
+from .classes import (
+    ChildDeclares, ChildDeclaresExternal, ChildInherits, Empty, OuterClass,
+    ParentDeclares,
+    )
 
 
-FUZZING_TYPES = [
+FUZZING_TYPES: list[object] = [
     None,
     int(),
     float(),
@@ -18,48 +23,85 @@ FUZZING_TYPES = [
     bool(),
     set(),
     frozenset(),
-    AltClass(),
-]
+    Empty(),
+    ]
 
 
 class TestFunctionality(TestCase):
-    def test_class_works(self):
-        self.assertTrue(Class().wrapped_method())
-        self.assertTrue(Class.wrapped_method(Class()))
 
-    def test_class_fails(self):
+    def test_method_works(self) -> None:
+        self.assertTrue(ParentDeclares().wrapped_method())
+        self.assertTrue(ParentDeclares.wrapped_method(ParentDeclares()))
+
+    def test_method_fails(self) -> None:
         with self.assertRaises(NotAnInstanceError):
-            Class.wrapped_method()
+            ParentDeclares.wrapped_method()  # type: ignore
         for test_type in FUZZING_TYPES:
             with self.assertRaises(NotAnInstanceError):
-                Class.wrapped_method(test_type)
+                ParentDeclares.wrapped_method(test_type)  # type: ignore
 
-    def test_sub_class_works(self):
-        self.assertTrue(SubClass().wrapped_method())
-        self.assertTrue(SubClass.wrapped_method(SubClass()))
+    def test_inheritance_works(self) -> None:
+        self.assertTrue(ChildInherits().wrapped_method())
+        self.assertTrue(
+            ChildInherits.wrapped_method(ChildInherits())
+            )
 
-    def test_sub_class_fails(self):
+    def test_inheritance_fails(self) -> None:
         with self.assertRaises(NotAnInstanceError):
-            SubClass.wrapped_method()
+            ChildInherits.wrapped_method()  # type: ignore
         for test_type in FUZZING_TYPES:
             with self.assertRaises(NotAnInstanceError):
-                SubClass.wrapped_method(test_type)
+                ChildInherits.wrapped_method(test_type)  # type: ignore
 
-    def test_nested_class_works(self):
-        self.assertTrue(Class.NestedClass().wrapped_method())
-        self.assertTrue(Class.NestedClass.wrapped_method(Class.NestedClass()))
+    def test_polymorphism_works(self) -> None:
+        self.assertTrue(ChildDeclares().wrapped_method())
+        self.assertTrue(ChildDeclares.wrapped_method(ChildDeclares()))
+        self.assertTrue(ChildDeclaresExternal().wrapped_method())
+        self.assertTrue(
+            ChildDeclaresExternal.wrapped_method(ChildDeclaresExternal())
+            )
 
-    def test_nested_class_fails(self):
+    def test_polymorphism_fails(self) -> None:
         with self.assertRaises(NotAnInstanceError):
-            Class.NestedClass.wrapped_method()
-        with self.assertRaises(NotAnInstanceError):
-            Class().NestedClass.wrapped_method()
+            ChildDeclares.wrapped_method()  # type: ignore
         for test_type in FUZZING_TYPES:
             with self.assertRaises(NotAnInstanceError):
-                Class.NestedClass.wrapped_method(test_type)
+                ChildDeclares.wrapped_method(test_type)  # type: ignore
+
+    def test_overriding_works(self) -> None:
+        self.assertTrue(ChildDeclares().wrapped_method())
+        self.assertTrue(ChildDeclares.wrapped_method(ChildDeclares()))
+
+    def test_overriding_fails(self) -> None:
+        with self.assertRaises(NotAnInstanceError):
+            ChildDeclares.wrapped_method()  # type: ignore
+        for test_type in FUZZING_TYPES:
             with self.assertRaises(NotAnInstanceError):
-                Class().NestedClass.wrapped_method(test_type)
-        
+                ChildDeclares.wrapped_method(test_type)  # type: ignore
+
+    def test_attribution_works(self) -> None:
+        self.assertTrue(OuterClass.NestedClass().wrapped_method())
+        self.assertTrue(
+            OuterClass.NestedClass.wrapped_method(
+                OuterClass.NestedClass()
+                )
+            )
+
+    def test_attribution_fails(self) -> None:
+        with self.assertRaises(NotAnInstanceError):
+            OuterClass.NestedClass.wrapped_method()  # type: ignore
+        with self.assertRaises(NotAnInstanceError):
+            OuterClass().NestedClass.wrapped_method()  # type: ignore
+        for test_type in FUZZING_TYPES:
+            with self.assertRaises(NotAnInstanceError):
+                OuterClass.NestedClass.wrapped_method(
+                    test_type  # type: ignore
+                    )
+            with self.assertRaises(NotAnInstanceError):
+                OuterClass().NestedClass.wrapped_method(
+                    test_type  # type: ignore
+                    )
+
 
 if __name__ == "__main__":
     main()
